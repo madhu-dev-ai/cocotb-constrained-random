@@ -2,11 +2,7 @@
 
 
 
-\[!\[CI](https://github.com/madhu-dev-ai/cocotb-constrained-random/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/madhu-dev-ai/cocotb-constrained-random/actions/workflows/ci.yml)
-
-
-
-A constrained-random verification testbench for an 8-bit ALU, written in Python with cocotb and simulated with Icarus Verilog.
+\[!\[CI](https://img.shields.io/github/actions/workflow/status/madhu-dev-ai/cocotb-constrained-random/ci.yml?branch=main\&label=CI)](https://github.com/madhu-dev-ai/cocotb-constrained-random/actions/workflows/ci.yml)A constrained-random verification testbench for an 8-bit ALU, written in Python with cocotb and simulated with Icarus Verilog.
 
 
 
