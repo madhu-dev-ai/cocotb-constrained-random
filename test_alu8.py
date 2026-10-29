@@ -99,3 +99,56 @@ async def test_constrained_random(dut):
 
     dut._log.info(f"zero flag was 1 in {zero_hits} of 1000 cycles")
     dut._log.info(f"carry flag was 1 in {carry_hits} of 1000 cycles")
+
+@cocotb.test()
+async def test_coverage(dut):
+    cocotb.start_soon(Clock(dut.clk, 10, "ns").start())
+
+    bins = {
+        "op_add": 0,
+        "op_sub": 0,
+        "op_and": 0,
+        "op_or": 0,
+        "add_overflow": 0,
+        "sub_borrow": 0,
+        "zero_result": 0,
+        "a_equals_b": 0,
+        "a_is_0": 0,
+        "a_is_255": 0,
+        "and_gives_zero": 0,
+        "or_gives_255": 0,
+    }
+
+    for i in range(2000):
+        a, b, op = pick_inputs()
+
+        expected = model(a, b, op)
+        actual = await apply(dut, a, b, op)
+        assert actual == expected, (
+            f"Mismatch at iteration {i}: a={a} b={b} op={op} "
+            f"expected={expected} actual={actual}"
+        )
+
+        result, carry, zero = actual
+
+        bins["op_add"] += op == 0
+        bins["op_sub"] += op == 1
+        bins["op_and"] += op == 2
+        bins["op_or"] += op == 3
+        bins["add_overflow"] += op == 0 and carry == 1
+        bins["sub_borrow"] += op == 1 and carry == 1
+        bins["zero_result"] += zero == 1
+        bins["a_equals_b"] += a == b
+        bins["a_is_0"] += a == 0
+        bins["a_is_255"] += a == 255
+        bins["and_gives_zero"] += op == 2 and zero == 1
+        bins["or_gives_255"] += op == 3 and result == 255
+
+    hit = sum(1 for count in bins.values() if count > 0)
+    dut._log.info("---- COVERAGE REPORT ----")
+    for name, count in bins.items():
+        dut._log.info(f"{name:16s} {count}")
+    dut._log.info(f"Coverage: {hit}/{len(bins)} bins hit")
+
+    missed = [name for name, count in bins.items() if count == 0]
+    assert not missed, f"Coverage holes: {missed}"
